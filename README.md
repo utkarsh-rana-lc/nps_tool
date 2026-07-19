@@ -81,3 +81,5 @@ limechat-nps/
     ├── widget/                 # injectable SDK
     └── dashboard/              # React ops UI
 ```
+
+Net Promoter, NPS® and Net Promoter Score® are registered trademarks of Bain & Company, Inc., Fred Reichheld and Satmetrix Systems, Inc.

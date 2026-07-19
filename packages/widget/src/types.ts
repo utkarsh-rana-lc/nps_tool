@@ -19,4 +19,7 @@ export interface EligibilityResponse {
   promptId: string | null;
   period: string;
   reason: string | null;
+  // Admin-configured copy (present when eligible). Widget falls back to defaults.
+  question?: string;
+  reasonPrompt?: string;
 }

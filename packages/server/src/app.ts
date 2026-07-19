@@ -6,6 +6,7 @@ import { widgetRoutes } from './routes/widget.js';
 import { analyticsRoutes } from './routes/analytics.js';
 import { exportRoutes } from './routes/export.js';
 import { authRoutes } from './routes/auth.js';
+import { settingsRoutes } from './routes/settings.js';
 
 export async function buildApp(config: Config): Promise<FastifyInstance> {
   const app = Fastify({ logger: true, trustProxy: true });
@@ -27,6 +28,7 @@ export async function buildApp(config: Config): Promise<FastifyInstance> {
   app.get('/health', async () => ({ ok: true }));
 
   await app.register(async (instance) => authRoutes(instance, config));
+  await app.register(async (instance) => settingsRoutes(instance, config));
   await app.register(async (instance) => widgetRoutes(instance, config));
   await app.register(async (instance) => analyticsRoutes(instance, config));
   await app.register(async (instance) => exportRoutes(instance, config));

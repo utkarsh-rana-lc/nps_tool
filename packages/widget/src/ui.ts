@@ -6,18 +6,43 @@ const PRODUCT_LABEL: Record<string, string> = {
   bot: 'LimeChat Bot',
 };
 
+/** Escape admin-provided copy before inserting into markup. */
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 export interface UiCallbacks {
   onScore: (score: number, reason: string) => void;
   onClose: () => void;
 }
 
+export interface WidgetCopy {
+  /** Main NPS question. Defaults to the product-named question if omitted. */
+  question?: string;
+  /** Follow-up reason prompt. */
+  reasonPrompt?: string;
+}
+
 /**
  * Renders the NPS pop-up inside a Shadow DOM so host-page CSS can never
- * interfere. Two steps: pick a 0–10 score, then give a reason.
+ * interfere. Two steps: pick a 0–10 score, then give a reason. Copy comes from
+ * the server (admin-configurable) with a sensible fallback.
  */
-export function renderWidget(cfg: NpsConfig, cb: UiCallbacks): { destroy: () => void } {
+export function renderWidget(
+  cfg: NpsConfig,
+  cb: UiCallbacks,
+  copy: WidgetCopy = {},
+): { destroy: () => void } {
   const accent = cfg.accentColor ?? '#1fa97a';
   const position = cfg.position ?? 'bottom-right';
+  const question =
+    copy.question ??
+    `How likely are you to recommend ${PRODUCT_LABEL[cfg.product] ?? 'LimeChat'} to a friend or colleague?`;
+  const reasonPrompt = copy.reasonPrompt ?? "What's the most important reason for your score?";
 
   const host = document.createElement('div');
   host.setAttribute('data-limechat-nps', '');
@@ -77,12 +102,12 @@ export function renderWidget(cfg: NpsConfig, cb: UiCallbacks): { destroy: () => 
       <div class="card">
         <button class="close" aria-label="Close">×</button>
         <div class="step-score">
-          <h3>How likely are you to recommend ${PRODUCT_LABEL[cfg.product] ?? 'LimeChat'} to a friend or colleague?</h3>
+          <h3>${escapeHtml(question)}</h3>
           <div class="scale"></div>
           <div class="legend"><span>Not likely</span><span>Very likely</span></div>
         </div>
         <div class="step-reason reason hidden">
-          <h3>What's the most important reason for your score?</h3>
+          <h3>${escapeHtml(reasonPrompt)}</h3>
           <textarea placeholder="Tell us a little more…"></textarea>
           <div class="actions"><button class="submit">Submit</button></div>
         </div>

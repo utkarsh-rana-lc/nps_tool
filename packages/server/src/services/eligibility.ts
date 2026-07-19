@@ -1,5 +1,6 @@
 import { withTransaction } from '../db.js';
 import { upsertAccount, upsertUser } from '../repositories/identity.js';
+import { getSetting } from '../repositories/surveySettings.js';
 import { currentPeriodMonth, periodLabel } from '../domain/period.js';
 import { newId } from '../domain/ids.js';
 import type { Product } from '../types.js';
@@ -17,6 +18,9 @@ export interface EligibilityResult {
   promptId: string | null;
   period: string; // YYYY-MM
   reason: 'already_prompted_this_month' | null;
+  // Admin-configurable copy the widget should render (only when eligible).
+  question?: string;
+  reasonPrompt?: string;
 }
 
 /**
@@ -71,6 +75,14 @@ export async function checkEligibility(
       };
     }
 
-    return { eligible: true, promptId, period, reason: null };
+    const copy = await getSetting(input.product, client);
+    return {
+      eligible: true,
+      promptId,
+      period,
+      reason: null,
+      question: copy.question,
+      reasonPrompt: copy.reasonPrompt,
+    };
   });
 }

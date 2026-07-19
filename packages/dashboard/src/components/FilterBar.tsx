@@ -30,13 +30,14 @@ export function FilterBar({
         ))}
       </div>
 
+      <span className="muted" style={{ fontSize: 12 }}>From</span>
       <input
         type="month"
         value={filters.dateFrom.slice(0, 7)}
         onChange={(e) => onChange({ ...filters, dateFrom: `${e.target.value}-01` })}
         aria-label="From month"
       />
-      <span className="muted">→</span>
+      <span className="muted" style={{ fontSize: 12 }}>to</span>
       <input
         type="month"
         value={filters.dateTo.slice(0, 7)}

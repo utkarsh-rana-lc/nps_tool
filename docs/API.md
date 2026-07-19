@@ -42,6 +42,26 @@ Any of: `{ "isActive": false }`, `{ "role": "admin" }`, `{ "password": "new-min-
 
 ---
 
+## Survey message settings
+
+The question and follow-up prompt shown in the pop-up are editable per product.
+
+### `GET /v1/nps/settings`  *(signed-in user)*
+```json
+{ "settings": [
+  { "product": "crm", "question": "How likely…?", "reasonPrompt": "What's the most important reason…?", "updatedAt": "2026-07-19T…" }
+] }
+```
+
+### `PUT /v1/nps/settings/:product`  *(admin only)*
+```json
+{ "question": "How likely are you to recommend LimeChat CRM?", "reasonPrompt": "Tell us why" }
+```
+**200** → `{ "setting": { "product": "crm", "question": "…", "reasonPrompt": "…" } }`.
+Validation: both fields required, max 300 chars each. The widget picks up the new copy on its next eligibility call.
+
+---
+
 ## Widget endpoints (write key)
 
 ### `GET /v1/nps/eligibility`
@@ -73,6 +93,20 @@ When not eligible:
 
 ```json
 { "eligible": false, "promptId": null, "period": "2026-07", "reason": "already_prompted_this_month" }
+```
+
+The eligibility response also carries the current **survey copy** for that
+product (admin-editable), so the widget always shows the latest message:
+
+```json
+{
+  "eligible": true,
+  "promptId": "prm_5f3c…",
+  "period": "2026-07",
+  "reason": null,
+  "question": "How likely are you to recommend LimeChat CRM to a friend or colleague?",
+  "reasonPrompt": "What's the most important reason for your score?"
+}
 ```
 
 ### `POST /v1/nps/responses`

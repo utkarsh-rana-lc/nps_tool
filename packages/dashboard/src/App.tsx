@@ -9,6 +9,7 @@ import { AccountsTable } from './components/AccountsTable.js';
 import { AccountDrawer } from './components/AccountDrawer.js';
 import { Login } from './components/Login.js';
 import { UsersPanel } from './components/UsersPanel.js';
+import { SurveyMessages } from './components/SurveyMessages.js';
 
 function defaultFilters(): Filters {
   const now = new Date();
@@ -23,6 +24,7 @@ export function App() {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [showUsers, setShowUsers] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
 
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -78,6 +80,9 @@ export function App() {
         </div>
         <div className="userbar">
           {user.role === 'admin' && (
+            <button className="btn" onClick={() => setShowMessages(true)}>Survey messages</button>
+          )}
+          {user.role === 'admin' && (
             <button className="btn" onClick={() => setShowUsers(true)}>Manage access</button>
           )}
           <span className="whoami">
@@ -106,6 +111,10 @@ export function App() {
 
       {showUsers && user.role === 'admin' && (
         <UsersPanel onClose={() => setShowUsers(false)} />
+      )}
+
+      {showMessages && user.role === 'admin' && (
+        <SurveyMessages onClose={() => setShowMessages(false)} />
       )}
     </div>
   );

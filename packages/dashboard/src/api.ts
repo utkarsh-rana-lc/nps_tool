@@ -47,6 +47,11 @@ export const api = {
     post<{ user: DashboardUserRow }>(`/v1/auth/users`, input),
   updateUser: (id: number, patch: { isActive?: boolean; role?: 'admin' | 'viewer'; password?: string }) =>
     patchReq<{ ok: boolean }>(`/v1/auth/users/${id}`, patch),
+
+  // ── survey message settings ──
+  getSettings: () => get<{ settings: SurveySetting[] }>(`/v1/nps/settings`),
+  updateSetting: (product: string, body: { question: string; reasonPrompt: string }) =>
+    putReq<{ setting: SurveySetting }>(`/v1/nps/settings/${product}`, body),
 };
 
 async function post<T>(path: string, body: unknown): Promise<T> {
@@ -70,6 +75,26 @@ async function patchReq<T>(path: string, body: unknown): Promise<T> {
   });
   if (!res.ok) throw new Error(`${path} → ${res.status}`);
   return res.json();
+}
+
+async function putReq<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const b = await res.json().catch(() => ({}));
+    throw new Error(b.message ?? `${path} → ${res.status}`);
+  }
+  return res.json();
+}
+
+export interface SurveySetting {
+  product: 'crm' | 'marketing' | 'bot';
+  question: string;
+  reasonPrompt: string;
+  updatedAt?: string;
 }
 
 export interface DashboardUserRow {

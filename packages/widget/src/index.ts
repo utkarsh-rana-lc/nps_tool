@@ -26,26 +26,32 @@ class LimeChatNPS {
   async show(): Promise<void> {
     if (!this.config || this.shown) return;
     let promptId: string | null = null;
+    let copy: { question?: string; reasonPrompt?: string } = {};
     try {
       const elig = await checkEligibility(this.config);
       if (!elig.eligible || !elig.promptId) return;
       promptId = elig.promptId;
+      copy = { question: elig.question, reasonPrompt: elig.reasonPrompt };
     } catch {
       return; // never break the host app over NPS
     }
 
     this.shown = true;
     const cfg = this.config;
-    renderWidget(cfg, {
-      onScore: (score, reason) => {
-        void submitResponse(cfg, promptId!, score, reason);
-        cfg.onSubmit?.({ score, reason });
+    renderWidget(
+      cfg,
+      {
+        onScore: (score, reason) => {
+          void submitResponse(cfg, promptId!, score, reason);
+          cfg.onSubmit?.({ score, reason });
+        },
+        onClose: () => {
+          void dismiss(cfg, promptId!);
+          cfg.onDismiss?.();
+        },
       },
-      onClose: () => {
-        void dismiss(cfg, promptId!);
-        cfg.onDismiss?.();
-      },
-    });
+      copy,
+    );
   }
 }
 

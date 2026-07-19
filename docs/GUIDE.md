@@ -106,6 +106,7 @@ Five tables (`db/migrations`):
 - **survey_prompts** — the throttle ledger: one row each time a user is *asked*, unique on `(user, product, month)`. It powers the once-a-month rule and the response-rate metric, and it stops a dismissed pop-up from re-nagging the same month.
 - **nps_responses** — the score (0–10) + reason + derived category, unique on `(user, product, month)` so a score is idempotent even under concurrent submits.
 - **dashboard_users** — our operators who can log in to the dashboard: email, scrypt password hash, role (`admin`/`viewer`), active flag.
+- **survey_settings** — the editable per-product survey copy (question + reason prompt) that the widget displays.
 
 `period_month` (a DATE pinned to the 1st, in the account's timezone) is the unit of the monthly cadence and the x-axis of every trend. Because eligibility keys off it, the survey window resets automatically on the 1st — **no cron is needed** for the core cadence.
 
@@ -146,6 +147,15 @@ Five tables (`db/migrations`):
 - Two roles: **admin** (can manage users) and **viewer** (read-only analytics).
 - Admin UI to invite users, set roles, enable/disable accounts, and reset passwords.
 - Every analytics and export endpoint requires a valid session; a server-side service key remains available for BI jobs.
+
+**Editable survey copy**
+
+- Admins can edit the **question and follow-up prompt** shown in the pop-up, **per product**, from the dashboard ("Survey messages").
+- The widget pulls the current copy on each eligibility check, so changes apply to new surveys immediately — no redeploy of the snippet.
+
+**Custom reporting window**
+
+- The dashboard filters by a **custom month-to-month window** (From → To) at monthly granularity — the level at which NPS is collected — plus a one-click "Last 12m".
 
 ---
 
@@ -256,6 +266,10 @@ Sign in as an admin and click **Manage access** (top right):
 - **Disable / enable** — disabled users are refused at login even if their password is correct (useful for offboarding without deleting history).
 - **Reset password** — set a new password for a user who's locked out.
 
+### Editing the survey message
+
+Admins get a **"Survey messages"** button next to "Manage access". It edits, per product, the main NPS question and the follow-up reason prompt. The widget reads this copy on its next eligibility check, so a change is live for new surveys right away — no need to touch the embedded snippet. Defaults are seeded by migration `003`, so the pop-up always has copy even before anyone edits it.
+
 ### Security notes
 
 - Set a strong, random `JWT_SECRET` in production. Rotating it invalidates all existing sessions (everyone must log back in).
@@ -279,7 +293,7 @@ pnpm install
 cp packages/server/.env.example packages/server/.env
 #   → set DATABASE_URL, a strong JWT_SECRET, ADMIN_API_KEY, WRITE_KEYS
 
-# 4. Create tables (runs 001_init + 002_dashboard_auth)
+# 4. Create tables (runs 001_init + 002_dashboard_auth + 003_survey_settings)
 pnpm --filter @limechat-nps/server migrate
 
 # 5. (optional) Load ~30 months of demo NPS data
