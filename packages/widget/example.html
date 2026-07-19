@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LimeChat NPS — widget demo</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: #f6f8fa; color: #1a2b3b; }
+    .app { max-width: 720px; margin: 60px auto; padding: 32px; background: #fff; border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,.06); }
+    h1 { margin-top: 0; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+    button.trigger { border: 0; border-radius: 10px; padding: 10px 16px; background: #1fa97a; color: #fff; font-weight: 600; cursor: pointer; }
+    label { font-size: 13px; color: #667085; }
+    input, select { padding: 8px; border: 1px solid #e4e7ec; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Pretend LimeChat product</h1>
+    <p>This page embeds the NPS widget exactly as a real product would. It points at
+      <code>http://localhost:4000</code>. Start the API + Postgres first.</p>
+
+    <div class="row">
+      <label>Product
+        <select id="product">
+          <option value="crm">crm</option>
+          <option value="marketing">marketing</option>
+          <option value="bot">bot</option>
+        </select>
+      </label>
+      <label>Account id <input id="account" value="acc_demo_1" /></label>
+      <label>Email <input id="email" value="demo@acme.com" /></label>
+    </div>
+    <div class="row">
+      <button class="trigger" onclick="trigger()">Init &amp; show NPS</button>
+    </div>
+    <p style="font-size:13px;color:#667085">Tip: trigger twice for the same product/email in one month — the second call is throttled and nothing appears.</p>
+  </div>
+
+  <!-- The one-line snippet a real product ships: -->
+  <script src="./dist/limechat-nps.js"></script>
+  <script>
+    function trigger() {
+      window.LimeChatNPS = window.LimeChatNPS || [];
+      LimeChatNPS.push(['init', {
+        writeKey: 'pk_test_demo',
+        apiBase: 'http://localhost:4000',
+        product: document.getElementById('product').value,
+        account: { id: document.getElementById('account').value, name: 'Acme Retail' },
+        user:    { email: document.getElementById('email').value, id: 'usr_1' },
+        auto: false,
+        onSubmit: (p) => console.log('submitted', p)
+      }]);
+      LimeChatNPS.push(['show']);
+    }
+  </script>
+</body>
+</html>

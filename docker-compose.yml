@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: nps
+      POSTGRES_PASSWORD: nps
+      POSTGRES_DB: limechat_nps
+    ports:
+      - "5432:5432"
+    volumes:
+      - nps_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nps -d limechat_nps"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  server:
+    build: ./packages/server
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://nps:nps@db:5432/limechat_nps
+      PORT: "4000"
+      ADMIN_API_KEY: sk_admin_change_me
+      CORS_ORIGINS: "*"
+    ports:
+      - "4000:4000"
+
+volumes:
+  nps_pgdata:

@@ -1,0 +1,19 @@
+{
+  "name": "limechat-nps",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Drop-in NPS collection & analytics for LimeChat (CRM, Marketing, Bot)",
+  "packageManager": "pnpm@9.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "migrate": "pnpm --filter @limechat-nps/server migrate"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
